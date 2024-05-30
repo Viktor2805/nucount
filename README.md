@@ -32,7 +32,8 @@ To run the tests for the entire project, use the following command:
 
 ```sh
 docker-compose run --rm tests
-
+ ```
+ 
 ### Environment Variables
 
 The `docker-compose.yml` file contains the following environment variables for the `transactions` service:
