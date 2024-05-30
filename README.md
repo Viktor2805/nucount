@@ -26,6 +26,13 @@ Once the services are up and running, you can access the application and its API
 - **Transactions Service**: `http://localhost:3000`
 - **Swagger API Documentation**: `http://localhost:3000/swagger/index.html`
 
+### Running Tests
+
+To run the tests for the entire project, use the following command:
+
+```sh
+docker-compose run --rm tests
+
 ### Environment Variables
 
 The `docker-compose.yml` file contains the following environment variables for the `transactions` service:

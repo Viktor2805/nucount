@@ -22,6 +22,10 @@ services:
       - "5435:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
+  tests:
+    build: .
+    command: go test -v ./...
+    depends_on:
+      - postgres
 volumes:
   postgres_data:
