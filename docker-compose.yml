@@ -1,0 +1,33 @@
+version: '3.7'
+
+services:
+  transactions:
+    build: .
+    ports:
+      - "3000:3000" 
+    depends_on:
+      - postgres
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "1"
+      POSTGRES_DB: "transactions"
+      POSTGRES_HOST: "postgres"
+      POSTGRES_PORT: 5432
+      MIGRATION_URL: "file://pkg/migrations"
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "1"
+      POSTGRES_DB: "transactions"
+      POSTGRES_HOST: "localhost"
+      POSTGRES_PORT: 5432
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
