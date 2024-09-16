@@ -1,0 +1,37 @@
+package controllers_test
+
+import (
+	"golang/internal/controllers"
+	"golang/internal/services"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
+func TestNewControllers(t *testing.T) {
+	// Set up mock services
+	mockServices := NewMockServices()
+
+	// Optionally, configure mock behavior
+	// mockServices.DNAService.On("SomeMethod").Return(expectedValue)
+
+	// Set up a mock DNAController
+	mockDNAController := new(MockDNAController)
+
+	// Optionally, configure mock behavior
+	// mockDNAController.On("SomeMethod").Return(expectedValue)
+
+	// Override NewDNAController to return the mockDNAController
+	oldNewDNAController := controllers.NewDNAController
+	defer func() { controllers.NewDNAController = oldNewDNAController }() // Restore original after test
+	controllers.NewDNAController = func(dnaService *services.DNAService) *controllers.DNAController {
+		return mockDNAController
+	}
+
+	// Call NewControllers
+	ctrlrs := controllers.NewControllers(mockServices)
+
+	// Assert that the Controllers struct is initialized correctly
+	assert.NotNil(t, ctrlrs)
+	assert.IsType(t, &MockDNAController{}, &ctrlrs.DNAController)
+}

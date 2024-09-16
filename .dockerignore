@@ -1,0 +1,13 @@
+# Exclude the Git-related files
+.git
+.gitignore
+.gitattributes
+
+# Exclude the IDE/editor config files
+.idea/
+.vscode/
+*.swp
+
+# Exclude environment files
+.env
+.env.* # Any other environment-specific files like .env.development, .env.production

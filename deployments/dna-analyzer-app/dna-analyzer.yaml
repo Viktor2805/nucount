@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dna-analyzer-deployment
+  labels:
+    app: dna-analyzer-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: dna-analyzer-app
+  template:
+    metadata:
+      labels:
+        app: dna-analyzer-app
+    spec:
+      containers:
+      - name: dna-analyzer
+        image: viktor2805/dna-analyzer:1.1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+
+        envFrom:
+        - secretRef:
+            name: dna-analyzer-secret
+        - configMapRef:
+            name: dna-analyzer-config
+
+      imagePullSecrets:
+      - name: regcred
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dna-analyzer-service
+spec:
+  type: NodePort
+  selector:
+    app: dna-analyzer-app
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 3000
+      nodePort: 30100

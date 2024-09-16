@@ -1,0 +1,10 @@
+// Package services provides the application's service layer, which includes business logic.
+// package services_test
+
+// type MockServices struct {
+// 	DNAService mock.Mock
+// }
+
+// func NewMockServices() *MockServices {
+// 	return &MockServices{}
+// }

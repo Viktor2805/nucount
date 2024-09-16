@@ -1,0 +1,29 @@
+package services
+
+import (
+	"bufio"
+	"io"
+	"mime/multipart"
+)
+
+type TXTService struct{}
+
+type TXTServiceI interface {
+	Read(file multipart.File) (string, error)
+}
+
+func NewTXTService() *TXTService {
+	return &TXTService{}
+}
+
+func (s *TXTService) Read(file multipart.File) (string, error) {
+	scanner := bufio.NewScanner(file)
+	if !scanner.Scan() {
+		if err := scanner.Err(); err != nil {
+			return "", err
+		}
+		// Reached EOF
+		return "", io.EOF
+	}
+	return scanner.Text(), nil
+}

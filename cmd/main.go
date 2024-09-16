@@ -1,14 +1,17 @@
+// Package main initializes and runs the DNA analyzer application, setting up routes,
+// controllers, and database connections necessary for processing and analyzing DNA sequences.
 package main
 
 import (
 	_ "golang/docs"
-	"golang/pkg/config"
-	"golang/pkg/controllers"
-	"golang/pkg/repository"
-	"golang/pkg/routes"
-	"golang/pkg/services"
+	"golang/internal/controllers"
+	"golang/internal/db"
+	"golang/internal/repository"
+	"golang/internal/server"
+	"golang/internal/services"
+	"log"
+	"os"
 
-	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
 
@@ -30,18 +33,26 @@ import (
 // @externalDocs.description  OpenAPI
 // @externalDocs.url          https://swagger.io/resources/open-api/
 func main() {
+	if err := godotenv.Load(); err != nil {
+		log.Fatal(".env file not found, skipping loading", err)
+	}
 
-	godotenv.Load("../.env")
-	config.Connect()
+	postgres, err := db.New()
 
-	repos := repository.NewRepositories(config.DB)
-	services := services.NewServices(repos)
+	if err != nil {
+		log.Fatal(err)
+	}
 
+	defer postgres.Close()
+
+	repositories := repository.NewRepositories(postgres.GetDB())
+	services := services.NewServices(repositories)
 	controllers := controllers.NewControllers(services)
 
-	router := gin.Default()
+	server := server.NewServer(
+		server.WithPort(os.Getenv("PORT")),
+		server.WithControllers(controllers),
+	)
 
-	routes.SetupRoutes(router, controllers)
-
-	router.Run(":3000")
+	server.StartServer()
 }
