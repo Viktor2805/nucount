@@ -46,7 +46,7 @@ func minMutation(startGene string, endGene string, bank []string) int {
 	for i := 0; i < 8; i++ {
 		if startGene[i] != endGene[i] {
 			for _, seq := range bank {
-				// startGeneBytes := []byte(startGene)
+
 				startGene[i] = endGene[i]
 
 				if string(startGeneBytes) == seq {
