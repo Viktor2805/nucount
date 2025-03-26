@@ -38,7 +38,6 @@ func generateRandomDNA(length int) string {
 
 func main() {
 	minMutation("AACCGGTT", "AAACGGTA", []string{"AACCGGTA", "AACCGCTA", "AAACGGTA"})
-
 }
 
 func minMutation(startGene string, endGene string, bank []string) int {
