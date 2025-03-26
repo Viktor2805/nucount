@@ -3,17 +3,17 @@ package services
 
 import (
 	"golang/internal/repository"
-	dna "golang/internal/services/dnaService"
+	sequence "golang/internal/services/sequenceService"
 )
 
 // Services interface
 type Services struct {
-	DNAService dna.DNAService
+	SequenceService sequence.SequenceServiceI
 }
 
 // NewServices initializes and returns a new Services instance with all required components.
-func NewServices(_ *repository.Repositories) *Services {
+func NewServices(repos *repository.Repositories) *Services {
 	return &Services{
-		DNAService: *dna.NewDNAService(),
+		SequenceService: sequence.NewSequenceService(repos.SequenceRepo), // Pass the repository
 	}
 }

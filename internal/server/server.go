@@ -7,6 +7,7 @@ import (
 	"golang/internal/routes"
 	"log"
 	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"syscall"
@@ -23,7 +24,7 @@ type Server struct {
 	router            *gin.Engine
 	port              string
 	controllers       *controllers.Controllers
-	healthCheckActive bool 
+	healthCheckActive bool
 	httpServer        *http.Server
 }
 
@@ -71,9 +72,8 @@ func NewServer(options ...Option) *Server {
 	server.httpServer = &http.Server{
 		Addr:         fmt.Sprintf(":%s", server.port),
 		Handler:      server.router,
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 10 * time.Second,
-		IdleTimeout:  30 * time.Second,
+		ReadTimeout:  10 * time.Minute, // Adjust as needed
+		WriteTimeout: 10 * time.Minute,
 	}
 
 	return server
@@ -81,13 +81,20 @@ func NewServer(options ...Option) *Server {
 
 func (s *Server) StartServer() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT)
-	defer stop() 
+	defer stop()
 
 	// Start server in a separate goroutine
 	go func() {
 		log.Printf("Starting server on %s", s.httpServer.Addr)
 		if err := s.httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("Server failed: %s\n", err)
+		}
+	}()
+
+	go func() {
+		log.Println("Starting pprof server on :6060")
+		if err := http.ListenAndServe(":6060", nil); err != nil {
+			log.Fatalf("pprof server failed: %s\n", err)
 		}
 	}()
 

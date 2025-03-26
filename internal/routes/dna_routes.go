@@ -10,6 +10,6 @@ import (
 func SetupDNARoutes(router *gin.RouterGroup, controllers *controllers.Controllers) {
 	dna := router.Group("/dna")
 	{
-		dna.POST("/analyze", controllers.DNAController.AnalyzeDNASeq)
+		dna.POST("/analyze", controllers.SequenceController.AnalyzeDNASeq)
 	}
 }

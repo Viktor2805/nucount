@@ -2,13 +2,13 @@
 package repository
 
 import (
-	dna "golang/internal/repository/dnaRepository"
+	sequence "golang/internal/repository/sequence"
 
 	"gorm.io/gorm"
 )
 
 type Repositories struct {
-	DNAAssemblyStatsRepo dna.AssemblyStatsRepository
+	SequenceRepo sequence.SequenceRepositoryI
 }
 
 func Paginate(limit, offset int) func(db *gorm.DB) *gorm.DB {
@@ -25,6 +25,6 @@ func Paginate(limit, offset int) func(db *gorm.DB) *gorm.DB {
 
 func NewRepositories(db *gorm.DB) *Repositories {
 	return &Repositories{
-		DNAAssemblyStatsRepo: *dna.NewAssemblyStatsRepository(db),
+		SequenceRepo: sequence.NewSequenceRepository(db),
 	}
 }
