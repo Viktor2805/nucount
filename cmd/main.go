@@ -41,6 +41,7 @@ func main() {
 
 }
 
+
 func minMutation(startGene string, endGene string, bank []string) int {
 	numMut := 0
 	charDiff := make(ma)
