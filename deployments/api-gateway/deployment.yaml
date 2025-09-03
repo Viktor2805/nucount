@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  namespace: app-prod
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      serviceAccountName: api-gateway
+      containers:
+      - name: gateway
+        image: viktor2805/dna-analyzer:1.1
+        imagePullPolicy: Always 
+        ports:
+          - name: http
+            containerPort: 8080
+        envFrom:
+          - configMapRef:
+              name: api-gateway-config
+          - secretRef:
+              name: api-gateway-secrets
+        readinessProbe:
+          httpGet:
+            path: /v1/readyz
+            port: http
+        livenessProbe:
+          httpGet:
+            path: /v1/healthz
+            port: http
+        securityContext:
+          runAsNonRoot: true
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - "ALL"
+          seccompProfile:
+            type: RuntimeDefault

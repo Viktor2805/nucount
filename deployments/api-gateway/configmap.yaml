@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-gateway-config
+  namespace: app-prod
+data:
+  APP_ENV: "production"
+  PORT: "8080"
+  UI_ORIGIN: "https://ui.example.com"
+  RATE_LIMITS: "1000/day"
+  BROKER_TOPIC: "qc.jobs"
+  REPORT_STORE_URL: "http://report-store.app-prod.svc.cluster.local"

@@ -1,0 +1,24 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: api-gateway-role
+  namespace: app-prod
+rules:
+- apiGroups: [""]
+  resources: ["configmaps", "secrets"]
+  resourceNames: ["api-gateway-config", "api-gateway-secrets"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: api-gateway-binding
+  namespace: app-prod
+subjects:
+- kind: ServiceAccount
+  name: api-gateway
+  namespace: app-prod
+roleRef:
+  kind: Role
+  name: api-gateway-role
+  apiGroup: rbac.authorization.k8s.io

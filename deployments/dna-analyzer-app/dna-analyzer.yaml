@@ -17,7 +17,7 @@ spec:
       containers:
       - name: dna-analyzer
         image: viktor2805/dna-analyzer:1.1
-        imagePullPolicy: Always
+        imagePullPolicy: Never
         ports:
         - containerPort: 8080
 

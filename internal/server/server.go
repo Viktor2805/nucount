@@ -46,7 +46,6 @@ func NewServer(options ...Option) *Server {
 	router := gin.Default()
 	routerGroup := router.Group("/api/v1")
 
-	// Default configuration
 	server := &Server{
 		router: router,
 	}
@@ -55,7 +54,6 @@ func NewServer(options ...Option) *Server {
 		option(server)
 	}
 
-	// Setup Sentry.
 	sentryDsn := os.Getenv("SENTRY_DSN")
 	if err := sentry.Init(sentry.ClientOptions{
 		Dsn:              sentryDsn,
@@ -83,7 +81,6 @@ func (s *Server) StartServer() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT)
 	defer stop()
 
-	// Start server in a separate goroutine
 	go func() {
 		log.Printf("Starting server on %s", s.httpServer.Addr)
 		if err := s.httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -101,10 +98,8 @@ func (s *Server) StartServer() {
 	<-ctx.Done()
 	log.Println("Received shutdown signal. Shutting down gracefully...")
 
-	// Disable health checks
 	s.healthCheckActive = false
 
-	// Create a context with a timeout to allow the server to shut down gracefully
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
