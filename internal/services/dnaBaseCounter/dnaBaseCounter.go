@@ -2,7 +2,7 @@
 package dna
 
 import (
-	"bufio"
+	"io"
 	"mime/multipart"
 	_ "net/http/pprof"
 )
@@ -26,37 +26,73 @@ func NewBasesCounter() *BasesCounter {
 // CountBases counts the GC content in the uploaded file.
 func (s *BasesCounter) CountBases(file multipart.File) (BasesCount, error) {
 	defer file.Close()
-	scanner := bufio.NewScanner(file)
 
-	buf := make([]byte, 1024*1024)     
-	scanner.Buffer(buf, 1024*1024)     
-	total := BasesCount{}
+	const bufSize = 4 << 20 
+	buf := make([]byte, bufSize)
 
-	for scanner.Scan() {
-		sequence := scanner.Bytes()
+	var lutA, lutC, lutG, lutT [256]uint8
+	lutA['A'], lutA['a'] = 1, 1
+	lutC['C'], lutC['c'] = 1, 1
+	lutG['G'], lutG['g'] = 1, 1
+	lutT['T'], lutT['t'] = 1, 1
 
-		if len(sequence) > 0 && sequence[0] == '>' {
-			continue
-		}
+	var total BasesCount
 
-		for _, b := range sequence {
-			switch b {
-			case 'G', 'g':
-					total.G++
-			case 'C', 'c':
-					total.C++
-			case 'T', 't':
-					total.T++
-			case 'A', 'a':
-					total.A++
+	inHeader := false
+
+	for {
+		n, err := file.Read(buf)
+		if n > 0 {
+			p := buf[:n]
+
+			i := 0
+			for i < len(p) {
+				if inHeader {
+					j := i
+					for j < len(p) && p[j] != '\n' {
+						j++
+					}
+					if j < len(p) && p[j] == '\n' {
+						inHeader = false
+						i = j + 1
+						continue
+					}
+					i = j
+					break
+				}
+
+				if p[i] == '>' && (i == 0 || p[i-1] == '\n') {
+					inHeader = true
+					continue
+				}
+
+				j := i
+				for j < len(p) && p[j] != '\n' {
+					j++
+				}
+				seg := p[i:j]
+
+				for _, b := range seg {
+					total.A += int(lutA[b])
+					total.C += int(lutC[b])
+					total.G += int(lutG[b])
+					total.T += int(lutT[b])
+				}
+
+				if j < len(p) && p[j] == '\n' {
+					j++
+				}
+				i = j
 			}
 		}
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return total, err
+		}
 	}
 
-	if err := scanner.Err(); err != nil {
-		return BasesCount{}, err
-	}
 	return total, nil
 }
-
 

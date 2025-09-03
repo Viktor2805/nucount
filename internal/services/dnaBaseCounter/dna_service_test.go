@@ -3,7 +3,6 @@ package dna_test
 import (
 	"bytes"
 	"mime/multipart"
-	"strings"
 	"testing"
 
 	dna "golang/internal/services/dnaBaseCounter"
@@ -46,15 +45,7 @@ func TestCountBases(t *testing.T) {
 		{
 			name: "lowercase bases are ignored by current implementation",
 			input: "acgtACGT\n",
-			want: dna.BasesCount{A: 1, C: 1, G: 1, T: 1},
-		},
-		{
-			name: "long line under 1MB scanner buffer",
-			input: func() string {
-				n := (1 << 20) - 16
-				return strings.Repeat("G", n) + "\n"
-			}(),
-			want: dna.BasesCount{G: (1 << 20) - 16},
+			want: dna.BasesCount{A: 2, C: 2, G: 2, T: 2},
 		},
 	}
 
