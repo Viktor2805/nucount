@@ -11,3 +11,18 @@
 # Exclude environment files
 .env
 .env.* # Any other environment-specific files like .env.development, .env.production
+
+# Build directories
+/bin/
+/build/
+/dist/
+/tmp/
+
+# Binaries and build artifacts
+*.exe
+*.exe~
+*.out
+*.test
+
+# Ignore log files
+*.log

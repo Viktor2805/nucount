@@ -4,6 +4,9 @@
 *.dll
 *.so
 *.dylib
+debug
+debug.test
+__debug_bin*
 
 # Test binary, built with "go test -c"
 *.test
