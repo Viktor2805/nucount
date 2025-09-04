@@ -10,9 +10,17 @@ build:
 lint:
 	revive ./...
 
-# Test the application
+# Test only internal packages
 test:
+	go test ./internal/... -v
+
+# Test the entire module
+test-all:
 	go test ./... -v
+
+# Run benchmarks
+bench:
+	go test -bench . -benchmem ./...
 
 #Running the application
 run: 
@@ -25,6 +33,7 @@ clean:
 
 docker-build:
 	docker build -t viktor2805/dna-analyzer:1.1 . && docker push viktor2805/dna-analyzer:1.1
+	
 # migration_up:
 # 	migrate -path pkg/db/migrations/ -database "postgresql://postgres:1@localhost:5435/time-saver?sslmode=disable" -verbose up
 

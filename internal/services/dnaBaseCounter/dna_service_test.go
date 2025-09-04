@@ -2,13 +2,21 @@ package dna_test
 
 import (
 	"bytes"
+	"errors"
 	"mime/multipart"
+	"strings"
 	"testing"
 
 	dna "golang/internal/services/dnaBaseCounter"
 )
 
-// nopCloser wraps bytes.Reader to satisfy multipart.File (adds Close()).
+type errAfterFile struct {
+	*bytes.Reader
+}
+func (f errAfterFile) Read(p []byte) (int, error) { return 0, errors.New("read failure") }
+func (f errAfterFile) Close() error               { return nil }
+
+
 type nopCloser struct{ *bytes.Reader }
 
 func (n nopCloser) Close() error { return nil }
@@ -16,6 +24,19 @@ func (n nopCloser) Close() error { return nil }
 func asMultipartFile(s string) multipart.File {
 	return nopCloser{bytes.NewReader([]byte(s))}
 }
+
+type limitedFile struct {
+	*bytes.Reader
+	limit int
+}
+
+func (lf *limitedFile) Read(p []byte) (int, error) {
+	if len(p) > lf.limit {
+			p = p[:lf.limit]
+	}
+	return lf.Reader.Read(p)
+}
+func (lf *limitedFile) Close() error { return nil }
 
 func TestCountBases(t *testing.T) {
 	t.Parallel()
@@ -78,6 +99,35 @@ func TestCountBases_MultipleLinesPerSeq(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CountBases() error: %v", err)
 	}
+	if got != want {
+		t.Fatalf("CountBases() = %+v, want %+v", got, want)
+	}
+}
+
+func TestCountBases_ErrorFile(t *testing.T) {
+	counter := dna.NewBasesCounter()
+
+	_, err := counter.CountBases(errAfterFile{})
+	if err == nil {
+		t.Fatal("expected error, got nil")
+	}
+}
+
+func TestCountBases_HeaderBreak(t *testing.T) {
+	counter := dna.NewBasesCounter()
+
+	input := ">" + strings.Repeat("HEADER", 50) + "\nACGT\n"
+
+	f := &limitedFile{
+		Reader: bytes.NewReader([]byte(input)),
+		limit:  1,
+	}
+
+	got, err := counter.CountBases(f)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	want := dna.BasesCount{A: 1, C: 1, G: 1, T: 1}
 	if got != want {
 		t.Fatalf("CountBases() = %+v, want %+v", got, want)
 	}

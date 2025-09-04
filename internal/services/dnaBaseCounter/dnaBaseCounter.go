@@ -57,7 +57,6 @@ func (s *BasesCounter) CountBases(file multipart.File) (BasesCount, error) {
 						i = j + 1
 						continue
 					}
-					i = j
 					break
 				}
 
