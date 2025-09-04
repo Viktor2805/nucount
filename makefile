@@ -8,7 +8,7 @@ build:
 
 #Running the linter for application
 lint:
-	revive ./...
+	golangci-lint run ./...
 
 # Test only internal packages
 test:
