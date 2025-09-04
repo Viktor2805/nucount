@@ -12,10 +12,7 @@ import (
 	"log"
 	_ "net/http/pprof"
 	"os"
-
 	// "sort"
-
-	"github.com/joho/godotenv"
 )
 
 // @title           Swagger Example API
@@ -37,10 +34,6 @@ import (
 // @externalDocs.url          https://swagger.io/resources/open-api/
 
 func main() {
-	if err := godotenv.Load(); err != nil {
-		log.Fatal(".env file not found, skipping loading", err)
-	}
-
 	postgres, err := db.New()
 
 	if err != nil {

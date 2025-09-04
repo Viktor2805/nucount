@@ -5,9 +5,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/golang-migrate/migrate"
-	_ "github.com/golang-migrate/migrate/database/postgres" // Import the Postgres driver to register it with the migrate package.
-	_ "github.com/golang-migrate/migrate/source/file"       // Import the file source driver to register it with the migrate package.
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -39,10 +36,6 @@ func New() (*Db, error) {
 		return nil, err
 	}
 	
-	if err := runMigrations(databaseURL); err != nil {
-		return nil, fmt.Errorf("migration failed: %w", err)
-	}
-
 	return &Db{db: db}, err
 }
 
@@ -58,25 +51,6 @@ func pingDatabase(gormDB *gorm.DB) error {
 	}
 
 	log.Println("Database connection is alive.")
-	return nil
-}
-
-// RunMigrations applies all pending migrations to the database.
-func runMigrations(databaseURL string) error {
-	m, err := migrate.New(
-		os.Getenv("MIGRATION_URL"),
-		databaseURL,
-	)
-
-	if err != nil {
-		log.Fatal("cannot create migrate instance", err)
-	}
-
-	if err = m.Up(); err != nil && err != migrate.ErrNoChange {
-		log.Fatal("failed to run migrate up: ", err)
-	}
-
-	log.Println("migration run successfully")
 	return nil
 }
 
