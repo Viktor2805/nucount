@@ -19,7 +19,7 @@ type Db struct {
 
 // NewDatabase initializes a new Database instance.
 func New() (*Db, error) {
-	databaseURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable&TimeZone=Europe/Kiev",
+	databaseURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
 		os.Getenv("POSTGRES_USER"),
 		os.Getenv("POSTGRES_PASSWORD"),
 		os.Getenv("POSTGRES_HOST"),
@@ -73,7 +73,7 @@ func runMigrations(databaseURL string) error {
 	}
 
 	if err = m.Up(); err != nil && err != migrate.ErrNoChange {
-		log.Fatal("failed to run migrate up:", err)
+		log.Fatal("failed to run migrate up: ", err)
 	}
 
 	log.Println("migration run successfully")

@@ -1,31 +1,29 @@
-FROM golang:1.25-alpine AS builder
+ARG GO_VERSION=1.25
+ARG ALPINE_VERSION=3.20
 
-WORKDIR /app
+FROM golang:${GO_VERSION}-alpine AS builder
+WORKDIR /src
 
-# Cache dependencies first
+ENV CGO_ENABLED=0 GOFLAGS=-mod=readonly
+
 COPY go.mod go.sum ./
-RUN go mod download
+RUN --mount=type=cache,target=/go/pkg/mod \
+    go mod download
 
-# Copy source
 COPY . .
 
-# Build binary
-RUN go build -o main ./cmd/main.go
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    --mount=type=cache,target=/go/pkg/mod \
+    go build -trimpath -buildvcs=false -ldflags="-s -w" -o /out/app ./cmd/main.go
 
-FROM alpine:3.19
-
+FROM alpine:${ALPINE_VERSION} AS runner
 WORKDIR /app
 
-# Copy binary from builder stage
-COPY --from=builder /app/main .
+RUN apk add --no-cache ca-certificates && \
+    adduser -D -u 10001 appuser
 
-# Create non-root user
-RUN adduser -D -u 1001 appuser && \
-    chown -R appuser:appuser /app
+COPY --from=builder /out/app /app/app
 
-USER 1001
-
-# Match the port your app listens on
+USER 10001
 EXPOSE 3000
-
-CMD ["/app/main"]
+ENTRYPOINT ["/app/app"]
