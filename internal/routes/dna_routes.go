@@ -10,7 +10,7 @@ import (
 
 // SetupDNARoutes sets up DNA-related routes.
 func SetupDNARoutes(router *gin.RouterGroup, controllers *controllers.Controllers) {
-	dna := router.Group("/dna")
+	dna := router.Group("/nucleotides")
 	{
 		dna.POST(
 			"/count",

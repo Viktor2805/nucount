@@ -13,7 +13,14 @@ type BasesCounterServiceI interface {
 
 // BasesCount holds the counts of bases.
 type BasesCount struct {
-	G, C, T, A int
+	A     int `json:"A"`
+	C     int `json:"C"`
+	G     int `json:"G"`
+	T     int `json:"T"`
+}
+
+func (b BasesCount) Total() int {
+	return b.A + b.C + b.G + b.T
 }
 
 // BasesCounter is used to count the bases in a DNA sequence.
@@ -36,7 +43,7 @@ func (s *BasesCounter) CountBases(file multipart.File) (BasesCount, error) {
 	lutG['G'], lutG['g'] = 1, 1
 	lutT['T'], lutT['t'] = 1, 1
 
-	var total BasesCount
+	var basesCount BasesCount
 
 	inHeader := false
 
@@ -72,10 +79,10 @@ func (s *BasesCounter) CountBases(file multipart.File) (BasesCount, error) {
 				seg := p[i:j]
 
 				for _, b := range seg {
-					total.A += int(lutA[b])
-					total.C += int(lutC[b])
-					total.G += int(lutG[b])
-					total.T += int(lutT[b])
+					basesCount.A += int(lutA[b])
+					basesCount.C += int(lutC[b])
+					basesCount.G += int(lutG[b])
+					basesCount.T += int(lutT[b])
 				}
 
 				if j < len(p) && p[j] == '\n' {
@@ -88,10 +95,10 @@ func (s *BasesCounter) CountBases(file multipart.File) (BasesCount, error) {
 			break
 		}
 		if err != nil {
-			return total, err
+			return basesCount, err
 		}
 	}
 
-	return total, nil
+	return basesCount, nil
 }
 

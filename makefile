@@ -22,6 +22,11 @@ test-all:
 bench:
 	go test -bench . -benchmem ./...
 
+.PHONY: swagger
+swagger:
+	@echo "Generating Swagger..."
+	swag init -g ./cmd/main.go -o ./docs
+
 #Running the application
 run: 
 	go run cmd/main.go

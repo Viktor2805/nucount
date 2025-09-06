@@ -24,137 +24,9 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/transactions/export-csv": {
-            "get": {
-                "description": "Exports transactions based on filters as a CSV file",
-                "produces": [
-                    "text/csv"
-                ],
-                "tags": [
-                    "transactions"
-                ],
-                "summary": "Export transactions as CSV",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Transaction ID",
-                        "name": "transaction_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Terminal ID",
-                        "name": "terminal_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Payment Narrative",
-                        "name": "payment_narrative",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Start Date",
-                        "name": "date_from",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "End Date",
-                        "name": "date_to",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "File transfer",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/apierror.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/apierror.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/transactions/export-json": {
-            "get": {
-                "description": "Exports transactions based on filters as a JSON file",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "transactions"
-                ],
-                "summary": "Export transactions as JSON",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Transaction ID",
-                        "name": "transaction_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Terminal ID",
-                        "name": "terminal_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Payment Narrative",
-                        "name": "payment_narrative",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Start Date",
-                        "name": "date_from",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "End Date",
-                        "name": "date_to",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "File transfer",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/apierror.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/apierror.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/transactions/upload": {
+        "/nucleotides/count": {
             "post": {
-                "description": "Uploads a CSV file containing transactions",
+                "description": "Upload a .fasta/.fa (or plain text FASTA) file and get counts of A/C/G/T with total.",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -162,13 +34,13 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "transactions"
+                    "dna"
                 ],
-                "summary": "Upload CSV file",
+                "summary": "Count DNA bases from a FASTA file",
                 "parameters": [
                     {
                         "type": "file",
-                        "description": "CSV file",
+                        "description": "FASTA file (.fasta, .fa) or text/plain",
                         "name": "file",
                         "in": "formData",
                         "required": true
@@ -178,17 +50,17 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/apierror.SuccessResponse"
+                            "$ref": "#/definitions/controllers.BasesCountResponse"
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Invalid file or parameters",
                         "schema": {
                             "$ref": "#/definitions/apierror.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal error while processing file",
                         "schema": {
                             "$ref": "#/definitions/apierror.ErrorResponse"
                         }
@@ -206,11 +78,31 @@ const docTemplate = `{
                 }
             }
         },
-        "apierror.SuccessResponse": {
+        "controllers.BasesCountDTO": {
             "type": "object",
             "properties": {
-                "status": {
-                    "type": "string"
+                "A": {
+                    "type": "integer"
+                },
+                "C": {
+                    "type": "integer"
+                },
+                "G": {
+                    "type": "integer"
+                },
+                "T": {
+                    "type": "integer"
+                }
+            }
+        },
+        "controllers.BasesCountResponse": {
+            "type": "object",
+            "properties": {
+                "bases": {
+                    "$ref": "#/definitions/controllers.BasesCountDTO"
+                },
+                "total": {
+                    "type": "integer"
                 }
             }
         }

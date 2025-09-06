@@ -12,7 +12,6 @@ import (
 	"log"
 	_ "net/http/pprof"
 	"os"
-	// "sort"
 )
 
 // @title           Swagger Example API

@@ -5,10 +5,23 @@ definitions:
       error:
         type: string
     type: object
-  apierror.SuccessResponse:
+  controllers.BasesCountDTO:
     properties:
-      status:
-        type: string
+      A:
+        type: integer
+      C:
+        type: integer
+      G:
+        type: integer
+      T:
+        type: integer
+    type: object
+  controllers.BasesCountResponse:
+    properties:
+      bases:
+        $ref: '#/definitions/controllers.BasesCountDTO'
+      total:
+        type: integer
     type: object
 externalDocs:
   description: OpenAPI
@@ -27,97 +40,14 @@ info:
   title: Swagger Example API
   version: "1.0"
 paths:
-  /transactions/export-csv:
-    get:
-      description: Exports transactions based on filters as a CSV file
-      parameters:
-      - description: Transaction ID
-        in: query
-        name: transaction_id
-        type: integer
-      - description: Terminal ID
-        in: query
-        name: terminal_id
-        type: string
-      - description: Payment Narrative
-        in: query
-        name: payment_narrative
-        type: string
-      - description: Start Date
-        in: query
-        name: date_from
-        type: string
-      - description: End Date
-        in: query
-        name: date_to
-        type: string
-      produces:
-      - text/csv
-      responses:
-        "200":
-          description: File transfer
-          schema:
-            type: string
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/apierror.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/apierror.ErrorResponse'
-      summary: Export transactions as CSV
-      tags:
-      - transactions
-  /transactions/export-json:
-    get:
-      description: Exports transactions based on filters as a JSON file
-      parameters:
-      - description: Transaction ID
-        in: query
-        name: transaction_id
-        type: integer
-      - description: Terminal ID
-        in: query
-        name: terminal_id
-        type: string
-      - description: Payment Narrative
-        in: query
-        name: payment_narrative
-        type: string
-      - description: Start Date
-        in: query
-        name: date_from
-        type: string
-      - description: End Date
-        in: query
-        name: date_to
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: File transfer
-          schema:
-            type: string
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/apierror.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/apierror.ErrorResponse'
-      summary: Export transactions as JSON
-      tags:
-      - transactions
-  /transactions/upload:
+  /nucleotides/count:
     post:
       consumes:
       - multipart/form-data
-      description: Uploads a CSV file containing transactions
+      description: Upload a .fasta/.fa (or plain text FASTA) file and get counts of
+        A/C/G/T with total.
       parameters:
-      - description: CSV file
+      - description: FASTA file (.fasta, .fa) or text/plain
         in: formData
         name: file
         required: true
@@ -128,16 +58,16 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/apierror.SuccessResponse'
+            $ref: '#/definitions/controllers.BasesCountResponse'
         "400":
-          description: Bad Request
+          description: Invalid file or parameters
           schema:
             $ref: '#/definitions/apierror.ErrorResponse'
         "500":
-          description: Internal Server Error
+          description: Internal error while processing file
           schema:
             $ref: '#/definitions/apierror.ErrorResponse'
-      summary: Upload CSV file
+      summary: Count DNA bases from a FASTA file
       tags:
-      - transactions
+      - dna
 swagger: "2.0"
