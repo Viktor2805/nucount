@@ -1,4 +1,4 @@
-package dna_test
+package nucleotide_test
 
 import (
 	"bytes"
@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	dna "golang/internal/services/dnaBaseCounter"
+	nucleotide "golang/internal/services/nucleotide"
 )
 
 type errAfterFile struct {
@@ -44,33 +44,33 @@ func TestCountBases(t *testing.T) {
 	tests := []struct {
 		name     string
 		input    string
-		want     dna.BasesCount
+		want     nucleotide.NucleotideCount
 		wantErr  bool
 	}{
 		{
 			name: "simple FASTA with headers and newlines",
 			input: ">seq1\nACGTACGTNN\n>seq2\nGGCC\n",
-			want: dna.BasesCount{A: 2, C: 4, G: 4, T: 2},
+			want: nucleotide.NucleotideCount{A: 2, C: 4, G: 4, T: 2},
 		},
 		{
 			name:    "empty file",
 			input:   "",
-			want:    dna.BasesCount{A: 0, C: 0, G: 0, T: 0},
+			want:    nucleotide.NucleotideCount{A: 0, C: 0, G: 0, T: 0},
 			wantErr: false,
 		},
 		{
 			name: "headers only are ignored",
 			input: ">seq1 something\n>seq2\n",
-			want: dna.BasesCount{},
+			want: nucleotide.NucleotideCount{},
 		},
 		{
 			name: "lowercase bases are ignored by current implementation",
 			input: "acgtACGT\n",
-			want: dna.BasesCount{A: 2, C: 2, G: 2, T: 2},
+			want: nucleotide.NucleotideCount{A: 2, C: 2, G: 2, T: 2},
 		},
 	}
 
-	counter := dna.NewBasesCounter()
+	counter := nucleotide.NewCounter()
 
 	for _, tt := range tests {
 		tt := tt
@@ -78,7 +78,7 @@ func TestCountBases(t *testing.T) {
 			t.Parallel()
 
 			file := asMultipartFile(tt.input)
-			got, err := counter.CountBases(file)
+			got, err := counter.Count(file)
 			if (err != nil) != tt.wantErr {
 				t.Fatalf("CountBases() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -90,12 +90,12 @@ func TestCountBases(t *testing.T) {
 }
 
 func TestCountBases_MultipleLinesPerSeq(t *testing.T) {
-	counter := dna.NewBasesCounter()
+	counter := nucleotide.NewCounter()
 
 	input := ">seq1\nACGTAC\nGT\n>seq2 description\nCC\nTTAA\n"
-	want := dna.BasesCount{A: 4, C: 4, G: 2, T: 4}
+	want := nucleotide.NucleotideCount{A: 4, C: 4, G: 2, T: 4}
 
-	got, err := counter.CountBases(asMultipartFile(input))
+	got, err := counter.Count(asMultipartFile(input))
 	if err != nil {
 		t.Fatalf("CountBases() error: %v", err)
 	}
@@ -105,16 +105,16 @@ func TestCountBases_MultipleLinesPerSeq(t *testing.T) {
 }
 
 func TestCountBases_ErrorFile(t *testing.T) {
-	counter := dna.NewBasesCounter()
+	counter := nucleotide.NewCounter()
 
-	_, err := counter.CountBases(errAfterFile{})
+	_, err := counter.Count(errAfterFile{})
 	if err == nil {
 		t.Fatal("expected error, got nil")
 	}
 }
 
 func TestCountBases_HeaderBreak(t *testing.T) {
-	counter := dna.NewBasesCounter()
+	counter := nucleotide.NewCounter()
 
 	input := ">" + strings.Repeat("HEADER", 50) + "\nACGT\n"
 
@@ -123,11 +123,11 @@ func TestCountBases_HeaderBreak(t *testing.T) {
 		limit:  1,
 	}
 
-	got, err := counter.CountBases(f)
+	got, err := counter.Count(f)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	want := dna.BasesCount{A: 1, C: 1, G: 1, T: 1}
+	want := nucleotide.NucleotideCount{A: 1, C: 1, G: 1, T: 1}
 	if got != want {
 		t.Fatalf("CountBases() = %+v, want %+v", got, want)
 	}

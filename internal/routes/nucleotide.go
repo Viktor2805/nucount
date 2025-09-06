@@ -3,7 +3,7 @@ package routes
 import (
 	"golang/internal/controllers"
 	"golang/internal/middleware"
-	basesCounter "golang/internal/services/dnaBaseCounter"
+	nucleotide "golang/internal/services/nucleotide"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,8 +14,8 @@ func SetupDNARoutes(router *gin.RouterGroup, controllers *controllers.Controller
 	{
 		dna.POST(
 			"/count",
-			middleware.MaxUploadSizeMiddleware(basesCounter.MaxUploadSizeFASTA),
-			controllers.BasesCounterController.CountBases,
+			middleware.MaxUploadSizeMiddleware(nucleotide.MaxUploadSizeFASTA),
+			controllers.NucleotideController.Count,
 		)
 	}
 }

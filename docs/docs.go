@@ -34,9 +34,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "dna"
+                    "nucleotides"
                 ],
-                "summary": "Count DNA bases from a FASTA file",
+                "summary": "Count nucleotides from a FASTA file",
                 "parameters": [
                     {
                         "type": "file",
@@ -50,7 +50,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/controllers.BasesCountResponse"
+                            "$ref": "#/definitions/controllers.NucleotideCountResponse"
                         }
                     },
                     "400": {
@@ -78,7 +78,7 @@ const docTemplate = `{
                 }
             }
         },
-        "controllers.BasesCountDTO": {
+        "controllers.NucleotideCountDTO": {
             "type": "object",
             "properties": {
                 "A": {
@@ -95,11 +95,11 @@ const docTemplate = `{
                 }
             }
         },
-        "controllers.BasesCountResponse": {
+        "controllers.NucleotideCountResponse": {
             "type": "object",
             "properties": {
                 "bases": {
-                    "$ref": "#/definitions/controllers.BasesCountDTO"
+                    "$ref": "#/definitions/controllers.NucleotideCountDTO"
                 },
                 "total": {
                     "type": "integer"

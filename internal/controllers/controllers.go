@@ -5,11 +5,11 @@ import (
 )
 
 type Controllers struct {
-	BasesCounterController *BasesController
+	NucleotideController *NucleotideController
 }
 
 func NewControllers(services *services.Services) *Controllers {
 	return &Controllers{
-		BasesCounterController: NewBasesCounterController(services.BasesCounterService),
+		NucleotideController: NewNucleotideController(services.NucleotideService),
 	}
 }

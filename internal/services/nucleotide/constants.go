@@ -1,3 +1,3 @@
-package dna
+package nucleotide
 
 const MaxUploadSizeFASTA = 2 << 30 // 10 MB limit

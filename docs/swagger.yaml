@@ -5,7 +5,7 @@ definitions:
       error:
         type: string
     type: object
-  controllers.BasesCountDTO:
+  controllers.NucleotideCountDTO:
     properties:
       A:
         type: integer
@@ -16,10 +16,10 @@ definitions:
       T:
         type: integer
     type: object
-  controllers.BasesCountResponse:
+  controllers.NucleotideCountResponse:
     properties:
       bases:
-        $ref: '#/definitions/controllers.BasesCountDTO'
+        $ref: '#/definitions/controllers.NucleotideCountDTO'
       total:
         type: integer
     type: object
@@ -58,7 +58,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/controllers.BasesCountResponse'
+            $ref: '#/definitions/controllers.NucleotideCountResponse'
         "400":
           description: Invalid file or parameters
           schema:
@@ -67,7 +67,7 @@ paths:
           description: Internal error while processing file
           schema:
             $ref: '#/definitions/apierror.ErrorResponse'
-      summary: Count DNA bases from a FASTA file
+      summary: Count nucleotides from a FASTA file
       tags:
-      - dna
+      - nucleotides
 swagger: "2.0"

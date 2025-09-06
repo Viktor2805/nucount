@@ -3,17 +3,17 @@ package services
 
 import (
 	"golang/internal/repository"
-	basesCounter "golang/internal/services/dnaBaseCounter"
+	nucleotide "golang/internal/services/nucleotide"
 )
 
 // Services interface
 type Services struct {
-	BasesCounterService basesCounter.BasesCounterServiceI
+	NucleotideService nucleotide.Service
 }
 
 // NewServices initializes and returns a new Services instance with all required components.
 func NewServices(repos *repository.Repositories) *Services {
 	return &Services{
-		BasesCounterService: basesCounter.NewBasesCounter(),
+		NucleotideService: nucleotide.NewCounter(),
 	}
 }
