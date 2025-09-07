@@ -5,6 +5,7 @@ import (
 
 	"gorm.io/gorm"
 )
+
 type SequenceRepositoryI interface {
 	Create(sequence *models.Sequence) error
 }

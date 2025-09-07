@@ -9,7 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-
 type NucleotideCountDTO struct {
 	A int `json:"A"`
 	C int `json:"C"`
@@ -19,7 +18,7 @@ type NucleotideCountDTO struct {
 
 type NucleotideCountResponse struct {
 	Bases NucleotideCountDTO `json:"bases"`
-	Total int           `json:"total"`
+	Total int                `json:"total"`
 }
 
 type NucleotideController struct {
@@ -53,7 +52,7 @@ func (c *NucleotideController) Count(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file extension. Please upload a .fasta or .fa file."})
 		return
 	}
-	
+
 	if !helpers.IsValidFASTAContentType(header) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid content type. Expected 'application/octet-stream' or 'text/plain'."})
 		return
@@ -67,7 +66,7 @@ func (c *NucleotideController) Count(ctx *gin.Context) {
 
 	resp := NucleotideCountResponse{
 		Bases: NucleotideCountDTO{A: bc.A, C: bc.C, G: bc.G, T: bc.T},
-		Total: bc.Total(),    
+		Total: bc.Total(),
 	}
 	ctx.JSON(http.StatusOK, resp)
 }

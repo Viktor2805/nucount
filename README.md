@@ -1,4 +1,4 @@
-# Transactions Service
+# DNA nucleotides count Service
 
 This project contains a Go-based transactions service which uses PostgreSQL as its database. The service is containerized using Docker and Docker Compose.
 

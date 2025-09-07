@@ -8,8 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// SetupDNARoutes sets up DNA-related routes.
-func SetupDNARoutes(router *gin.RouterGroup, controllers *controllers.Controllers) {
+func SetupNucleotideRoutes(router *gin.RouterGroup, controllers *controllers.Controllers) {
 	dna := router.Group("/nucleotides")
 	{
 		dna.POST(

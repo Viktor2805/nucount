@@ -1,4 +1,3 @@
-// Package repository initializes
 package repository
 
 import (

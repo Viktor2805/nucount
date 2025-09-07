@@ -6,8 +6,8 @@ import (
 	"testing"
 )
 
-func BenchmarkCountNucleotides_Small(b *testing.B)  {
-	counter := 	nucleotide.NewCounter()
+func BenchmarkCountNucleotides_Small(b *testing.B) {
+	counter := nucleotide.NewCounter()
 	input := ">seq1\nACGTACGT\n"
 
 	b.ResetTimer()
@@ -36,7 +36,7 @@ func BenchmarkCountNucleotides_1MB(b *testing.B) {
 
 func BenchmarkCountNucleotides_10MB(b *testing.B) {
 	counter := nucleotide.NewCounter()
-	input := strings.Repeat("ACGT", (10<<20)/4) 
+	input := strings.Repeat("ACGT", (10<<20)/4)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {

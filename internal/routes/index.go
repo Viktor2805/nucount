@@ -12,7 +12,7 @@ import (
 // SetupRoutes configures API routes and integrates Swagger documentation for the provided router and controllers.
 // It sets up the route groups and binds the handlers for each route.
 func SetupRoutes(routerGroup *gin.RouterGroup, controllers *controllers.Controllers) {
-	SetupDNARoutes(routerGroup, controllers)
+	SetupNucleotideRoutes(routerGroup, controllers)
 
 	routerGroup.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 }

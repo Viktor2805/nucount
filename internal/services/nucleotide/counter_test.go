@@ -13,9 +13,9 @@ import (
 type errAfterFile struct {
 	*bytes.Reader
 }
+
 func (f errAfterFile) Read(p []byte) (int, error) { return 0, errors.New("read failure") }
 func (f errAfterFile) Close() error               { return nil }
-
 
 type nopCloser struct{ *bytes.Reader }
 
@@ -32,7 +32,7 @@ type limitedFile struct {
 
 func (lf *limitedFile) Read(p []byte) (int, error) {
 	if len(p) > lf.limit {
-			p = p[:lf.limit]
+		p = p[:lf.limit]
 	}
 	return lf.Reader.Read(p)
 }
@@ -42,15 +42,15 @@ func TestCountBases(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
-		name     string
-		input    string
-		want     nucleotide.NucleotideCount
-		wantErr  bool
+		name    string
+		input   string
+		want    nucleotide.NucleotideCount
+		wantErr bool
 	}{
 		{
-			name: "simple FASTA with headers and newlines",
+			name:  "simple FASTA with headers and newlines",
 			input: ">seq1\nACGTACGTNN\n>seq2\nGGCC\n",
-			want: nucleotide.NucleotideCount{A: 2, C: 4, G: 4, T: 2},
+			want:  nucleotide.NucleotideCount{A: 2, C: 4, G: 4, T: 2},
 		},
 		{
 			name:    "empty file",
@@ -59,14 +59,14 @@ func TestCountBases(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "headers only are ignored",
+			name:  "headers only are ignored",
 			input: ">seq1 something\n>seq2\n",
-			want: nucleotide.NucleotideCount{},
+			want:  nucleotide.NucleotideCount{},
 		},
 		{
-			name: "lowercase bases are ignored by current implementation",
+			name:  "lowercase bases are ignored by current implementation",
 			input: "acgtACGT\n",
-			want: nucleotide.NucleotideCount{A: 2, C: 2, G: 2, T: 2},
+			want:  nucleotide.NucleotideCount{A: 2, C: 2, G: 2, T: 2},
 		},
 	}
 

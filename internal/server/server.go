@@ -14,6 +14,7 @@ import (
 	"time"
 
 	sentrygin "github.com/getsentry/sentry-go/gin"
+	"go.uber.org/zap"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/gin-gonic/gin"
@@ -26,9 +27,16 @@ type Server struct {
 	controllers       *controllers.Controllers
 	healthCheckActive bool
 	httpServer        *http.Server
+	logger            *zap.Logger
 }
 
 type Option func(*Server)
+
+func WithLogger(l *zap.Logger) Option {
+	return func(s *Server) {
+		s.logger = l
+	}
+}
 
 func WithPort(port string) Option {
 	return func(s *Server) {
@@ -36,9 +44,9 @@ func WithPort(port string) Option {
 	}
 }
 
-func WithControllers(controllers *controllers.Controllers) Option {
+func WithControllers(c *controllers.Controllers) Option {
 	return func(s *Server) {
-		s.controllers = controllers
+		s.controllers = c
 	}
 }
 
@@ -55,12 +63,19 @@ func NewServer(options ...Option) *Server {
 	}
 
 	sentryDsn := os.Getenv("SENTRY_DSN")
-	if err := sentry.Init(sentry.ClientOptions{
+
+	err := sentry.Init(sentry.ClientOptions{
 		Dsn:              sentryDsn,
 		EnableTracing:    true,
 		TracesSampleRate: 1.0,
-	}); err != nil {
-		log.Fatal("Init sentry failed")
+	})
+
+	if err != nil {
+		server.logger.Fatal("sentry init failed", zap.Error(err))
+	}
+
+	if os.Getenv("SENTRY_DSN") != "" {
+		router.Use(sentrygin.New(sentrygin.Options{}))
 	}
 
 	router.Use(sentrygin.New(sentrygin.Options{}))
@@ -70,7 +85,7 @@ func NewServer(options ...Option) *Server {
 	server.httpServer = &http.Server{
 		Addr:         fmt.Sprintf(":%s", server.port),
 		Handler:      server.router,
-		ReadTimeout:  10 * time.Minute, // Adjust as needed
+		ReadTimeout:  10 * time.Minute,
 		WriteTimeout: 10 * time.Minute,
 	}
 
@@ -82,21 +97,21 @@ func (s *Server) StartServer() {
 	defer stop()
 
 	go func() {
-		log.Printf("Starting server on %s", s.httpServer.Addr)
+		s.logger.Info("starting server", zap.String("addr", s.httpServer.Addr))
 		if err := s.httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("Server failed: %s\n", err)
+			s.logger.Fatal("server failed", zap.Error(err))
 		}
 	}()
 
 	go func() {
 		log.Println("Starting pprof server on :6060")
 		if err := http.ListenAndServe(":6060", nil); err != nil {
-			log.Fatalf("pprof server failed: %s\n", err)
+			s.logger.Fatal("pprof server failed", zap.Error(err))
 		}
 	}()
 
 	<-ctx.Done()
-	log.Println("Received shutdown signal. Shutting down gracefully...")
+	s.logger.Info("Received shutdown signal. Shutting down gracefully...")
 
 	s.healthCheckActive = false
 
@@ -104,9 +119,9 @@ func (s *Server) StartServer() {
 	defer cancel()
 
 	if err := s.httpServer.Shutdown(ctx); err != nil {
-		log.Fatalf("Server shutdown failed: %s\n", err)
+		s.logger.Error("graceful shutdown failed", zap.Error(err))
 	} else {
-		log.Println("Server shutdown successfully")
+		s.logger.Info("server stopped cleanly")
 	}
 }
 

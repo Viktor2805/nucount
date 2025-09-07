@@ -2,20 +2,21 @@ package db
 
 import (
 	"fmt"
-	"log"
 	"os"
 
+	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 // Database wraps the GORM DB connection and provides methods to interact with the database.
 type Db struct {
-	db *gorm.DB
+	*gorm.DB
+	logger *zap.Logger
 }
 
 // NewDatabase initializes a new Database instance.
-func New() (*Db, error) {
+func New(logger *zap.Logger) (*Db, error) {
 	databaseURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
 		os.Getenv("POSTGRES_USER"),
 		os.Getenv("POSTGRES_PASSWORD"),
@@ -29,18 +30,19 @@ func New() (*Db, error) {
 	}), &gorm.Config{})
 
 	if err != nil {
-		log.Fatal(err)
+		logger.Error("Failed to open", zap.Error(err))
 	}
 
-	if err := pingDatabase(db); err != nil {
+	if err := pingDatabase(db, logger); err != nil {
 		return nil, err
 	}
-	
-	return &Db{db: db}, err
+
+	logger.Info("Database connection established successfully")
+	return &Db{DB: db, logger: logger}, err
 }
 
 // pingDatabase ensures the database connection is alive by pinging it.
-func pingDatabase(gormDB *gorm.DB) error {
+func pingDatabase(gormDB *gorm.DB, logger *zap.Logger) error {
 	sqlDB, err := gormDB.DB()
 	if err != nil {
 		return fmt.Errorf("failed to get database object: %w", err)
@@ -50,18 +52,17 @@ func pingDatabase(gormDB *gorm.DB) error {
 		return fmt.Errorf("failed to ping database: %w", err)
 	}
 
-	log.Println("Database connection is alive.")
+	logger.Info("Database ping successful")
 	return nil
-}
-
-// GetDb returns the db instance
-func (d *Db) GetDB() *gorm.DB {
-	return d.db
 }
 
 // Close disconnects the database connection.
 func (d *Db) Close() error {
-	sqlDB, err := d.db.DB()
+	if d == nil || d.DB == nil {
+		return nil
+	}
+
+	sqlDB, err := d.DB.DB()
 	if err != nil {
 		return fmt.Errorf("failed to get SQL DB from GORM: %w", err)
 	}
@@ -70,6 +71,6 @@ func (d *Db) Close() error {
 		return fmt.Errorf("failed to close database connection: %w", err)
 	}
 
-	log.Println("Database connection closed successfully.")
+	d.logger.Info("Database connection closed successfully.")
 	return nil
 }
