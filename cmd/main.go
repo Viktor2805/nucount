@@ -39,11 +39,14 @@ func main() {
 	log := logger.Init()
 	defer log.Sync()
 
-	config.LoadConfig()
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatal("failed to load config", zap.Error(err))
+	}
 
 	dbLogger := log.With(zap.String("component", "db"))
 
-	db, err := db.New(dbLogger)
+	db, err := db.New(&cfg.Database, dbLogger)
 	if err != nil {
 		log.Fatal("db init failed", zap.Error(err))
 	}

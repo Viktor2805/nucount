@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"golang/internal/config"
 	pkgdb "golang/internal/db"
 
 	"github.com/docker/go-connections/nat"
@@ -21,7 +22,7 @@ const (
 	pgDB   = "testdb"
 )
 
-func startPostgres(t *testing.T) (container testcontainers.Container, host string, port string) {
+func startPostgres(t *testing.T) (container testcontainers.Container, host string, port int) {
 	t.Helper()
 
 	ctx := context.Background()
@@ -47,22 +48,27 @@ func startPostgres(t *testing.T) (container testcontainers.Container, host strin
 	mp, err := c.MappedPort(ctx, nat.Port("5432/tcp"))
 	require.NoError(t, err)
 
-	return c, h, mp.Port()
+	return c, h, mp.Int()
+}
+
+func makeDBCfg(host string, port int ) *config.DatabaseConfig {
+	return &config.DatabaseConfig{
+		User:     pgUser,
+		Password: pgPass,
+		Host:     host,
+		Port:     port,
+		Name:     pgDB,
+	}
 }
 
 func TestNew_OK(t *testing.T) {
 	c, host, port := startPostgres(t)
 	defer func() { _ = c.Terminate(context.Background()) }()
-
-	t.Setenv("POSTGRES_USER", pgUser)
-	t.Setenv("POSTGRES_PASSWORD", pgPass)
-	t.Setenv("POSTGRES_HOST", host)
-	t.Setenv("POSTGRES_PORT", port)
-	t.Setenv("POSTGRES_DB", pgDB)
+	cfg := makeDBCfg(host, port)
 
 	logger := zaptest.NewLogger(t)
 
-	db, err := pkgdb.New(logger)
+	db, err := pkgdb.New(cfg, logger)
 	require.NoError(t, err, "should connect to containerized Postgres")
 	require.NotNil(t, db)
 
@@ -76,29 +82,21 @@ func TestNew_DBDown(t *testing.T) {
 	c, host, port := startPostgres(t)
 	require.NoError(t, c.Terminate(context.Background()))
 
-	t.Setenv("POSTGRES_USER", pgUser)
-	t.Setenv("POSTGRES_PASSWORD", pgPass)
-	t.Setenv("POSTGRES_HOST", host)
-	t.Setenv("POSTGRES_PORT", port)
-	t.Setenv("POSTGRES_DB", pgDB)
+	cfg := makeDBCfg(host, port)
 
 	logger := zaptest.NewLogger(t)
 
-	db, err := pkgdb.New(logger)
+	db, err := pkgdb.New(cfg, logger)
 	require.Error(t, err, "New must fail because DB is not up")
 	require.Nil(t, db)
 }
 
 func TestNew_BadPort(t *testing.T) {
-	t.Setenv("POSTGRES_USER", "x")
-	t.Setenv("POSTGRES_PASSWORD", "x")
-	t.Setenv("POSTGRES_HOST", "127.0.0.1")
-	t.Setenv("POSTGRES_PORT", "1") 
-	t.Setenv("POSTGRES_DB", "x")
+	cfg := makeDBCfg("127.0.0.", 1)
 
-	logger := zap.NewNop() 
+	logger := zap.NewNop()
 
-	db, err := pkgdb.New(logger)
+	db, err := pkgdb.New(cfg, logger)
 	require.Error(t, err, "should fail to connect with invalid host/port")
 	require.Nil(t, db)
 }

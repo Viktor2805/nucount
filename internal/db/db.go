@@ -3,7 +3,7 @@ package db
 import (
 	"context"
 	"fmt"
-	"os"
+	"golang/internal/config"
 	"time"
 
 	"go.uber.org/zap"
@@ -17,13 +17,13 @@ type Db struct {
 }
 
 // NewDatabase initializes a new Database instance.
-func New(logger *zap.Logger) (*Db, error) {
-	databaseURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		os.Getenv("POSTGRES_USER"),
-		os.Getenv("POSTGRES_PASSWORD"),
-		os.Getenv("POSTGRES_HOST"),
-		os.Getenv("POSTGRES_PORT"),
-		os.Getenv("POSTGRES_DB"),
+func New(cfg *config.DatabaseConfig, logger *zap.Logger) (*Db, error) {
+	databaseURL := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
+		cfg.User,
+		cfg.Password,
+		cfg.Host,
+		cfg.Port,
+		cfg.Name,
 	)
 
 	db, err := gorm.Open(postgres.New(postgres.Config{
@@ -33,7 +33,7 @@ func New(logger *zap.Logger) (*Db, error) {
 	if err != nil {
 		return nil, fmt.Errorf("gorm open: %w", err)
 	}
-	
+
 	d := &Db{DB: db, logger: logger}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
@@ -70,7 +70,6 @@ func (d *Db) Close() error {
 
 	sqlDB, err := d.DB.DB()
 
-	
 	if err != nil {
 		return fmt.Errorf("failed to get SQL DB from GORM: %w", err)
 	}
