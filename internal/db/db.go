@@ -1,15 +1,16 @@
 package db
 
 import (
+	"context"
 	"fmt"
 	"os"
+	"time"
 
 	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-// Database wraps the GORM DB connection and provides methods to interact with the database.
 type Db struct {
 	*gorm.DB
 	logger *zap.Logger
@@ -30,39 +31,46 @@ func New(logger *zap.Logger) (*Db, error) {
 	}), &gorm.Config{})
 
 	if err != nil {
-		logger.Error("Failed to open", zap.Error(err))
+		return nil, fmt.Errorf("gorm open: %w", err)
 	}
+	
+	d := &Db{DB: db, logger: logger}
 
-	if err := pingDatabase(db, logger); err != nil {
-		return nil, err
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	if err := d.Ping(ctx); err != nil {
+		return nil, fmt.Errorf("db ping %w", err)
 	}
 
 	logger.Info("Database connection established successfully")
-	return &Db{DB: db, logger: logger}, err
+	return d, nil
 }
 
 // pingDatabase ensures the database connection is alive by pinging it.
-func pingDatabase(gormDB *gorm.DB, logger *zap.Logger) error {
-	sqlDB, err := gormDB.DB()
+func (d *Db) Ping(ctx context.Context) error {
+	if d == nil || d.DB == nil {
+		return fmt.Errorf("db not initialized")
+	}
+
+	sqlDb, err := d.DB.DB()
+
 	if err != nil {
-		return fmt.Errorf("failed to get database object: %w", err)
+		return fmt.Errorf("get sql db: %w", err)
 	}
 
-	if err := sqlDB.Ping(); err != nil {
-		return fmt.Errorf("failed to ping database: %w", err)
-	}
-
-	logger.Info("Database ping successful")
-	return nil
+	return sqlDb.PingContext(ctx)
 }
 
 // Close disconnects the database connection.
 func (d *Db) Close() error {
 	if d == nil || d.DB == nil {
-		return nil
+		return fmt.Errorf("db not initialized")
 	}
 
 	sqlDB, err := d.DB.DB()
+
+	
 	if err != nil {
 		return fmt.Errorf("failed to get SQL DB from GORM: %w", err)
 	}

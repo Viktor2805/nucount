@@ -9,7 +9,6 @@ type Config struct {
 	SentryDSN string
 }
 
-
 type SentryConfig struct {
 	DSN string `envconfig:"SENTRY_DSN"`
 }
@@ -27,4 +26,3 @@ func getEnv(key, fallback string) string {
 	}
 	return fallback
 }
-

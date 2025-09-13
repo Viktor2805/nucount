@@ -1,3 +1,3 @@
 package nucleotide
 
-const MaxUploadSizeFASTA = 2 << 30 // 10 MB limit
+const MaxUploadSizeFASTA = 2 << 30 // 2 GB limit
